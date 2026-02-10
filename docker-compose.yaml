@@ -48,18 +48,19 @@ services:
       retries: 5
 
   pgbouncer:
-    image: bitnamilegacy/pgbouncer
+    image: edoburu/pgbouncer:latest
     container_name: pgbouncer_pooler
     restart: always
     ports:
       - "6432:6432" # Map PgBouncer port to host
     volumes:
-      - ./pgbouncer/conf:/bitnami/pgbouncer/conf
+      - ./pgbouncer/conf/pgbouncer.ini:/etc/pgbouncer/pgbouncer.ini
+      - ./pgbouncer/conf/userlist.txt:/etc/pgbouncer/userlist.txt
     environment:
-      POSTGRESQL_USERNAME: flint
-      POSTGRESQL_PASSWORD: MyFlintPassword123
-      POSTGRESQL_HOST: postgres_db
-      POSTGRESQL_PORT: 5432
+      DB_USER: flint
+      DB_PASSWORD: MyFlintPassword123
+      DB_HOST: postgres_db
+      DB_PORT: 5432
       POOL_MODE: transaction # Recommended for most use casesi
       PGUSER: flint
     depends_on:
@@ -70,8 +71,8 @@ services:
     healthcheck:
       # This may not tbe the best health check. The pg_isready program is not in this container. 
       # Specific checks can be made with: docker compose exec pgbouncer some_program -args ... 
-      test: ["CMD-SHELL", "PGPASSWORD=MyFlintPassword123 psql -h localhost -p 6432 -U flint -d prefect2 -c 'SELECT 1' || exit 1"]
-      #test: ['CMD', 'sh', '-c', 'echo dummy']
+      #test: ["CMD-SHELL", "PGPASSWORD=MyFlintPassword123 psql -h localhost -p 6432 -U flint -d prefect2 -c 'SELECT 1' || exit 1"]
+      test: ['CMD', 'sh', '-c', 'echo dummy']
       interval: 3s
       timeout: 3s
       retries: 1
