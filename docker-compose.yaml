@@ -60,15 +60,18 @@ services:
       POSTGRESQL_PASSWORD: MyFlintPassword123
       POSTGRESQL_HOST: postgres_db
       POSTGRESQL_PORT: 5432
-      POOL_MODE: transaction # Recommended for most use cases
+      POOL_MODE: transaction # Recommended for most use casesi
+      PGUSER: flint
     depends_on:
       postgres:
         condition: service_healthy
     networks:
       - app-network
     healthcheck:
-      #test: ['CMD', 'sh', '-c', 'exec psql -p 6432 -U "flint" -d prefect3 -w -c "SHOW USERS"']
-      test: ['CMD', 'sh', '-c', 'echo tim']
+      # This may not tbe the best health check. The pg_isready program is not in this container. 
+      # Specific checks can be made with: docker compose exec pgbouncer some_program -args ... 
+      test: ["CMD-SHELL", "PGPASSWORD=MyFlintPassword123 psql -h localhost -p 6432 -U flint -d prefect2 -c 'SELECT 1' || exit 1"]
+      #test: ['CMD', 'sh', '-c', 'echo dummy']
       interval: 3s
       timeout: 3s
       retries: 1
